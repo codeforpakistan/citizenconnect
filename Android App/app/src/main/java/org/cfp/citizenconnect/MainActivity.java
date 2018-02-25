@@ -1,5 +1,6 @@
 package org.cfp.citizenconnect;
 
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
@@ -19,19 +20,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SearchView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
+
 import org.cfp.citizenconnect.Adapters.MyPagerAdapter;
 import org.cfp.citizenconnect.Interfaces.ScrollStatus;
 import org.cfp.citizenconnect.Interfaces.Search;
+import org.cfp.citizenconnect.Model.MessageEvent;
 import org.cfp.citizenconnect.Model.NotificationUpdate;
 import org.cfp.citizenconnect.databinding.ActivityMainBinding;
+import org.greenrobot.eventbus.EventBus;
 
 import static org.cfp.citizenconnect.CitizenConnectApplication.realm;
 import static org.cfp.citizenconnect.Constants.CALL_PERMISSION_REQUEST;
+import static org.cfp.citizenconnect.Constants.ICT_NOTIFICATION_ID;
 
 
 public class MainActivity extends AppCompatActivity implements ScrollStatus {
@@ -53,12 +61,14 @@ public class MainActivity extends AppCompatActivity implements ScrollStatus {
     SearchView searchView;
     MenuItem searchMenu;
 
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 3;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         progress = new ProgressDialog(this);
-        progress.setMessage("Please wait");
+        progress.setMessage(getString(R.string.in_progress_msg));
         progress.setCancelable(false);
         //progress.show();
         notificationUpdate = NotificationUpdate.getInstance(realm);
@@ -73,16 +83,8 @@ public class MainActivity extends AppCompatActivity implements ScrollStatus {
         bottomNavigation.addItem(item2);
         bottomNavigation.addItem(item3);
         bottomNavigation.addItem(item4);
-        if (getIntent().getExtras() != null) {
-            clearNotificationCount = getIntent().getExtras().getBoolean("clearNotificationCount", false);
-            if (clearNotificationCount) {
-                notificationUpdate.setNewNotification(0);
-                changeNotificationStatus("", ContextCompat.getColor(MainActivity.this, R.color.red));
-            }
-        } else {
-            if (notificationUpdate.getNewNotification() != 0) {
-                changeNotificationStatus(notificationUpdate.getNewNotification() + "", ContextCompat.getColor(MainActivity.this, R.color.red));
-            }
+        if (notificationUpdate.getNewNotification() != 0) {
+            changeNotificationStatus(notificationUpdate.getNewNotification() + "", ContextCompat.getColor(MainActivity.this, R.color.red));
         }
         bottomNavigation.setDefaultBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.white));
         bottomNavigation.setAccentColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary));
@@ -122,6 +124,20 @@ public class MainActivity extends AppCompatActivity implements ScrollStatus {
 
             }
         });
+        KeyboardVisibilityEvent.setEventListener(
+                MainActivity.this,
+                new KeyboardVisibilityEventListener() {
+                    @Override
+                    public void onVisibilityChanged(boolean isOpen) {
+                        if(isOpen){
+                            binding.bottomNavigation.setVisibility(View.GONE);
+                            bottomNavigation.hideBottomNavigation(true);
+                        }else {
+                            binding.bottomNavigation.setVisibility(View.VISIBLE);
+                            bottomNavigation.restoreBottomNavigation(true);
+                        }
+                    }
+                });
         bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
             mViewPager.setCurrentItem(position);
             return true;
@@ -254,6 +270,14 @@ public class MainActivity extends AppCompatActivity implements ScrollStatus {
                 }
             }
             break;
+            case REQUEST_PERMISSION_GET_ACCOUNTS: {
+                if (grantResults.length > 0) {
+                    EventBus.getDefault().post(new MessageEvent("Permission Granted", true));
+                } else {
+                    EventBus.getDefault().post(new MessageEvent("Permission Denied", false));
+                }
+            }
+            break;
             default:
                 break;
         }
@@ -268,8 +292,15 @@ public class MainActivity extends AppCompatActivity implements ScrollStatus {
     @Override
     public void OnScrollStatusChanged(boolean status) {
         if (status) {
+            NotificationManager notificationManager = (NotificationManager)
+                    getSystemService(Context.
+                            NOTIFICATION_SERVICE);
+            notificationManager.cancel(ICT_NOTIFICATION_ID);
             changeNotificationStatus("", ContextCompat.getColor(MainActivity.this, R.color.red));
-            notificationUpdate.setNewNotification(0);
+            realm.executeTransaction(realm -> {
+                notificationUpdate.setLastStateRead(true);
+                notificationUpdate.setNewNotification(0);
+            });
         }
     }
 }

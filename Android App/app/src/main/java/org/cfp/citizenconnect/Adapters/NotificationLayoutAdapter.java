@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -60,6 +61,7 @@ public class NotificationLayoutAdapter extends RecyclerView.Adapter<Notification
         TextView BtnShare;
         TextView description;
         TextView DateTime;
+        LinearLayout descriptionLayout;
         TextView view;
 
         public MyViewHolder(final View itemView) {
@@ -68,17 +70,20 @@ public class NotificationLayoutAdapter extends RecyclerView.Adapter<Notification
             BtnShare = itemView.findViewById(R.id.BtnShare);
             description = itemView.findViewById(R.id.description);
             DateTime = itemView.findViewById(R.id.DateTime);
+            descriptionLayout = itemView.findViewById(R.id.descriptionLayout);
             view = itemView.findViewById(R.id.view);
 
             BtnShare.setOnClickListener(view -> mListener.ShareImageClickListener(getAdapterPosition(), snapHolder.getDrawable()));
-            view.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath()));
+            view.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(),description.getText().toString()));
+            descriptionLayout.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(),description.getText().toString()));
+            snapHolder.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(),description.getText().toString()));
         }
     }
 
     public interface OnItemInteractionListener {
         void ShareImageClickListener(int position, Drawable image);
 
-        void FullSizeImageClickListener(String imagePath);
+        void FullSizeImageClickListener(String imagePath,String description);
 
     }
 }

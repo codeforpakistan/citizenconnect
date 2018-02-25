@@ -6,7 +6,7 @@
     <string name="ambulance">051-115</string>
     <string name="fireBrigade">051-16</string>
     <string name="playStoreUrl">https://play.google.com/store/apps/details?id=org.cfp.citizenconnect</string>
-    
+
     <string name="bottom_item1">Notification</string>
     <string name="bottom_item2">Services</string>
     <string name="bottom_item3">Data</string>
@@ -15,7 +15,8 @@
     <string name="search_hint">Search Notification</string>
 
     <string name="feedback_msg">Do you have a feedback or a question? Send us a message and someone from our ICT team will get in touch with you shortly.</string>
-
+    <string name="in_progress_msg">Please wait…</string>
+    <string name="completed_msg">Operation Completed!</string>
 
     <string name="feedbackPrompt">Subject</string>
 
@@ -23,6 +24,10 @@
         <item>Traffic Issues</item>
         <item>Government offices</item>
         <item>Others</item>
-
     </string-array>
+
+    <string name="no_internet_msg">No Internet Available</string>
+    <string name="status_success">success</string>
+    <string name="sendEmailURL">xxxx</string>
 </resources>
+
