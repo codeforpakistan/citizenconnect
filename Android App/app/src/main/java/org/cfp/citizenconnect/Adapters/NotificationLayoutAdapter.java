@@ -7,7 +7,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,15 +30,13 @@ public class NotificationLayoutAdapter extends RecyclerView.Adapter<Notification
     public NotificationLayoutAdapter(Context mContext, List<Notifications> snapList, OnItemInteractionListener mListener) {
         this.notificationList = snapList;
         this.mContext = mContext;
-        inflater = LayoutInflater.from(mContext);
+//        inflater = LayoutInflater.from(mContext);
         this.mListener = mListener;
     }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.notification_layout, parent, false);
-
+        View itemView = LayoutInflater.from(mContext).inflate(R.layout.notification_layout, parent, false);
         return new MyViewHolder(itemView);
     }
 
@@ -74,16 +71,16 @@ public class NotificationLayoutAdapter extends RecyclerView.Adapter<Notification
             view = itemView.findViewById(R.id.view);
 
             BtnShare.setOnClickListener(view -> mListener.ShareImageClickListener(getAdapterPosition(), snapHolder.getDrawable()));
-            view.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(),description.getText().toString()));
-            descriptionLayout.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(),description.getText().toString()));
-            snapHolder.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(),description.getText().toString()));
+            view.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(), description.getText().toString()));
+            descriptionLayout.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(), description.getText().toString()));
+            snapHolder.setOnClickListener(view -> mListener.FullSizeImageClickListener(notificationList.get(getAdapterPosition()).getFilePath(), description.getText().toString()));
         }
     }
 
     public interface OnItemInteractionListener {
         void ShareImageClickListener(int position, Drawable image);
 
-        void FullSizeImageClickListener(String imagePath,String description);
+        void FullSizeImageClickListener(String imagePath, String description);
 
     }
 }
